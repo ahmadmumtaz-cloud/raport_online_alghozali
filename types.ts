@@ -35,6 +35,7 @@ export interface Student {
   name: string;
   studentId: string; // Nomor Induk
   class: string;
+  gender: 'Laki-laki' | 'Perempuan';
 }
 
 export interface Grade {

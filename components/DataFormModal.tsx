@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-type FieldType = 'text' | 'multiselect';
+type FieldType = 'text' | 'multiselect' | 'select';
 
 interface FormField {
     name: string;
@@ -74,6 +74,24 @@ const DataFormModal: React.FC<DataFormModalProps> = ({ isOpen, onClose, onSave, 
                             onChange={handleMultiSelectChange}
                             className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md h-32"
                         >
+                            {field.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
+                    </div>
+                );
+            // FIX: Add case for 'select' field type for dropdowns
+            case 'select':
+                 return (
+                    <div key={field.name}>
+                        <label htmlFor={field.name} className="block text-sm font-medium text-slate-700">{field.label}</label>
+                        <select
+                            id={field.name}
+                            name={field.name}
+                            required={field.required}
+                            value={formData[field.name] || ''}
+                            onChange={handleChange}
+                            className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                        >
+                            <option value="" disabled>Pilih salah satu</option>
                             {field.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
                     </div>
