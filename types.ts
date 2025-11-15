@@ -6,17 +6,22 @@ export interface School {
   academicYear: string;
 }
 
-export interface User {
+export type User = {
   id: string;
   name: string;
-  role: 'admin' | 'teacher';
-  subjects?: string[];
-}
-
-export interface Teacher extends User {
+} & ({
+  role: 'admin';
+} | {
   role: 'teacher';
   subjects: string[];
-}
+} | {
+  role: 'homeroom';
+  class: string;
+});
+
+// FIX: Define and export the Teacher type as a specific User role to resolve import errors.
+export type Teacher = User & { role: 'teacher' };
+
 
 export interface HomeroomTeacher {
   id: string;
@@ -46,6 +51,16 @@ export interface HistoryLog {
     user: string;
     action: string;
     details: string;
+}
+
+export interface StudentLedgerData {
+  studentId: string;
+  studentName: string;
+  scores: { [subject: string]: number };
+  total: number;
+  average: number;
+  rank: number;
+  predicate: string;
 }
 
 export enum AppView {

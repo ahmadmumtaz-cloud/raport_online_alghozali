@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Grade, HomeroomTeacher, School, Student, User } from '../types';
 import { exportToWord, exportToExcel } from '../services/exportService';
 import { WordIcon, ExcelIcon } from './icons/ExportIcons';
@@ -11,12 +11,22 @@ interface ReportCardProps {
     classes: string[];
     studentsByClass: { [key: string]: Student[] };
     teachersById: { [key: string]: User };
+    currentUser: User;
 }
 
-const ReportCard: React.FC<ReportCardProps> = ({ grades, homeroomTeachers, schoolInfo, classes, studentsByClass, teachersById }) => {
-    const [selectedClass, setSelectedClass] = useState<string>('');
+const ReportCard: React.FC<ReportCardProps> = ({ grades, homeroomTeachers, schoolInfo, classes, studentsByClass, teachersById, currentUser }) => {
+    const isHomeroom = currentUser.role === 'homeroom';
+    const initialClass = isHomeroom ? currentUser.class : '';
+    
+    const [selectedClass, setSelectedClass] = useState<string>(initialClass);
     const [selectedStudentId, setSelectedStudentId] = useState<string>('');
     const [selectedSemester, setSelectedSemester] = useState<1 | 2>(1);
+    
+    useEffect(() => {
+        if(isHomeroom) {
+            setSelectedClass(currentUser.class);
+        }
+    }, [currentUser, isHomeroom]);
 
     const studentsInClass = selectedClass ? studentsByClass[selectedClass] || [] : [];
     
@@ -71,7 +81,7 @@ const ReportCard: React.FC<ReportCardProps> = ({ grades, homeroomTeachers, schoo
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-slate-50 rounded-lg border">
                 <div>
                     <label className="block text-sm font-medium text-slate-700">Kelas</label>
-                    <select value={selectedClass} onChange={e => { setSelectedClass(e.target.value); setSelectedStudentId(''); }} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                    <select value={selectedClass} onChange={e => { setSelectedClass(e.target.value); setSelectedStudentId(''); }} disabled={isHomeroom} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md disabled:bg-slate-200">
                         <option value="">Pilih Kelas</option>
                         {classes.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>

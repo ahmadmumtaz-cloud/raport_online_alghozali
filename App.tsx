@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { Grade, AppView, User, HistoryLog, Teacher, Student, HomeroomTeacher } from './types';
+import { Grade, AppView, User, HistoryLog, Student, HomeroomTeacher } from './types';
 import { 
     INITIAL_GRADES, SCHOOL_INFO, INITIAL_STUDENTS, INITIAL_TEACHERS, INITIAL_HOMEROOM_TEACHERS, 
     INITIAL_SUBJECTS, ADMIN_USER
@@ -13,6 +13,9 @@ import DataManagement from './components/DataManagement';
 import HistoryLogView from './components/HistoryLogView';
 import Login from './components/Login';
 
+// Helper to get a typed user from the generic list
+const findTeacher = (id: string) => INITIAL_TEACHERS.find(t => t.id === id);
+
 const App: React.FC = () => {
     // --- STATE MANAGEMENT ---
     const [currentUser, setCurrentUser] = useState<User | null>(null);
@@ -20,15 +23,13 @@ const App: React.FC = () => {
     
     // Data master sekarang dikelola sebagai state
     const [students, setStudents] = useState<Student[]>(INITIAL_STUDENTS);
-    const [teachers, setTeachers] = useState<Teacher[]>(INITIAL_TEACHERS);
+    const [teachers, setTeachers] = useState<(User & {role: 'teacher'})[]>(INITIAL_TEACHERS);
     const [homeroomTeachers, setHomeroomTeachers] = useState<HomeroomTeacher[]>(INITIAL_HOMEROOM_TEACHERS);
     const [subjects, setSubjects] = useState<string[]>(INITIAL_SUBJECTS);
     const [grades, setGrades] = useState<Grade[]>(INITIAL_GRADES);
     const [history, setHistory] = useState<HistoryLog[]>([]);
 
     // --- COMPUTED/MEMOIZED DATA ---
-    const allUsers: User[] = useMemo(() => [...teachers, ADMIN_USER], [teachers]);
-    
     const studentsByClass = useMemo(() => {
         return students.reduce((acc, student) => {
             if (!acc[student.class]) acc[student.class] = [];
@@ -38,11 +39,11 @@ const App: React.FC = () => {
     }, [students]);
 
     const teachersById = useMemo(() => {
-        return allUsers.reduce((acc, user) => {
+        return [...teachers, ADMIN_USER].reduce((acc, user) => {
             acc[user.id] = user;
             return acc;
         }, {} as { [key: string]: User });
-    }, [allUsers]);
+    }, [teachers]);
 
     const studentsById = useMemo(() => {
         return students.reduce((acc, student) => {
@@ -100,13 +101,13 @@ const App: React.FC = () => {
     };
     
     // Teacher CRUD
-    const handleTeacherAction = (action: 'add' | 'update' | 'delete', data: Teacher | string) => {
+    const handleTeacherAction = (action: 'add' | 'update' | 'delete', data: (User & {role: 'teacher'}) | string) => {
          if (action === 'add') {
-            const newTeacher = { ...data as Teacher, id: `T${Date.now()}` };
+            const newTeacher = { ...data as (User & {role: 'teacher'}), id: `T${Date.now()}` };
             setTeachers(prev => [...prev, newTeacher]);
             addHistoryLog('Tambah Guru', `Menambahkan guru baru: ${newTeacher.name}`);
         } else if (action === 'update') {
-            const updatedTeacher = data as Teacher;
+            const updatedTeacher = data as (User & {role: 'teacher'});
             setTeachers(prev => prev.map(t => t.id === updatedTeacher.id ? updatedTeacher : t));
             addHistoryLog('Update Guru', `Memperbarui data guru: ${updatedTeacher.name}`);
         } else if (action === 'delete') {
@@ -185,12 +186,28 @@ const App: React.FC = () => {
 
     // --- RENDER LOGIC ---
     if (!currentUser) {
-        return <Login teachers={teachers} adminUser={ADMIN_USER} onLogin={handleLogin} />;
+        return <Login teachers={teachers} adminUser={ADMIN_USER} homeroomTeachers={homeroomTeachers} onLogin={handleLogin} />;
     }
 
-    const teacherViews = [AppView.DASHBOARD, AppView.GRADE_INPUT, AppView.SUMMARY, AppView.REPORT_CARD];
     const adminViews = [AppView.DASHBOARD, AppView.SUMMARY, AppView.REPORT_CARD, AppView.DATA_MANAGEMENT, AppView.HISTORY];
-    const availableViews = currentUser.role === 'admin' ? adminViews : teacherViews;
+    const teacherViews = [AppView.DASHBOARD, AppView.GRADE_INPUT, AppView.SUMMARY, AppView.REPORT_CARD];
+    const homeroomViews = [AppView.DASHBOARD, AppView.SUMMARY, AppView.REPORT_CARD];
+
+    let availableViews: AppView[];
+    switch (currentUser.role) {
+        case 'admin':
+            availableViews = adminViews;
+            break;
+        case 'teacher':
+            availableViews = teacherViews;
+            break;
+        case 'homeroom':
+            availableViews = homeroomViews;
+            break;
+        default:
+            availableViews = [];
+    }
+    
 
     const renderView = () => {
         switch (view) {
@@ -199,7 +216,7 @@ const App: React.FC = () => {
             case AppView.GRADE_INPUT:
                 if (currentUser.role !== 'teacher') return <p>Hanya guru yang bisa mengakses halaman ini.</p>;
                 return <GradeInput 
-                    currentTeacher={currentUser as Teacher}
+                    currentTeacher={currentUser}
                     studentsByClass={studentsByClass}
                     onSaveGrades={handleSaveGrades}
                     allClasses={allClasses}
@@ -212,6 +229,8 @@ const App: React.FC = () => {
                     classes={allClasses}
                     studentsById={studentsById}
                     teachersById={teachersById}
+                    students={students}
+                    currentUser={currentUser}
                 />;
             case AppView.REPORT_CARD:
                 return <ReportCard
@@ -221,6 +240,7 @@ const App: React.FC = () => {
                     classes={allClasses}
                     studentsByClass={studentsByClass}
                     teachersById={teachersById}
+                    currentUser={currentUser}
                 />;
             case AppView.DATA_MANAGEMENT:
                 if (currentUser.role !== 'admin') return <p>Hanya admin yang bisa mengakses halaman ini.</p>;
