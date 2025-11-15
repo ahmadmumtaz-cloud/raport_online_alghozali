@@ -1,0 +1,5 @@
+{
+  "name": "RAPORT ONLINE PONDOK MODERN AL-GHOZALI",
+  "description": "A comprehensive online report card management system. It allows data uploads, full CRUD management for students and teachers, grade input, and generates professional report cards with export functionality.",
+  "requestFramePermissions": []
+}

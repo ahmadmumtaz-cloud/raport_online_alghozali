@@ -1,0 +1,197 @@
+import React, { useState, useMemo } from 'react';
+import { Grade, HomeroomTeacher, School, Student, User } from '../types';
+import { exportToWord, exportToExcel } from '../services/exportService';
+import { WordIcon, ExcelIcon } from './icons/ExportIcons';
+import { SUBJECT_MAP } from '../constants';
+
+interface ReportCardProps {
+    grades: Grade[];
+    homeroomTeachers: HomeroomTeacher[];
+    schoolInfo: School;
+    classes: string[];
+    studentsByClass: { [key: string]: Student[] };
+    teachersById: { [key: string]: User };
+}
+
+const ReportCard: React.FC<ReportCardProps> = ({ grades, homeroomTeachers, schoolInfo, classes, studentsByClass, teachersById }) => {
+    const [selectedClass, setSelectedClass] = useState<string>('');
+    const [selectedStudentId, setSelectedStudentId] = useState<string>('');
+    const [selectedSemester, setSelectedSemester] = useState<1 | 2>(1);
+
+    const studentsInClass = selectedClass ? studentsByClass[selectedClass] || [] : [];
+    
+    const selectedStudent = useMemo(() => {
+        return studentsInClass.find(s => s.id === selectedStudentId);
+    }, [studentsInClass, selectedStudentId]);
+
+    const homeroomTeacher = useMemo(() => {
+        return homeroomTeachers.find(t => t.class === selectedClass);
+    }, [homeroomTeachers, selectedClass]);
+
+    const studentGrades = useMemo(() => {
+        if (!selectedStudent) return [];
+        return grades
+            .filter(g => g.studentId === selectedStudent.studentId && g.semester === selectedSemester)
+            .sort((a, b) => a.subject.localeCompare(b.subject));
+    }, [grades, selectedStudent, selectedSemester]);
+
+    const totalScore = useMemo(() => {
+        if (studentGrades.length === 0) return 0;
+        return studentGrades.reduce((sum, g) => sum + g.score, 0);
+    }, [studentGrades]);
+
+    const averageScore = useMemo(() => {
+        if (studentGrades.length === 0) return 0;
+        const total = studentGrades.reduce((sum, g) => sum + g.score, 0);
+        return (total / studentGrades.length).toFixed(2);
+    }, [studentGrades]);
+    
+    const handleExportWord = () => {
+        if (!selectedStudent) return;
+        const fileName = `Raport_${selectedStudent.name.replace(' ', '_')}_Semester_${selectedSemester}`;
+        exportToWord('report-card-content', fileName, schoolInfo.name);
+    }
+    
+    const handleExportExcel = () => {
+        if (!selectedStudent) return;
+        const fileName = `Raport_${selectedStudent.name.replace(' ', '_')}_Semester_${selectedSemester}.xlsx`;
+        exportToExcel('report-card-table', fileName);
+    }
+
+    const toHindiArabic = (num: number | string): string => {
+        const arabicNumerals = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
+        // Also handle decimal points if any
+        return String(num).replace(/[0-9.]/g, (d) => d === '.' ? ',' : arabicNumerals[parseInt(d)]);
+    };
+
+
+    return (
+        <div>
+            <h2 className="text-2xl font-bold text-slate-800 mb-4">Cetak Raport Siswa</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 p-4 bg-slate-50 rounded-lg border">
+                <div>
+                    <label className="block text-sm font-medium text-slate-700">Kelas</label>
+                    <select value={selectedClass} onChange={e => { setSelectedClass(e.target.value); setSelectedStudentId(''); }} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option value="">Pilih Kelas</option>
+                        {classes.map(c => <option key={c} value={c}>{c}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-slate-700">Siswa</label>
+                    <select value={selectedStudentId} onChange={e => setSelectedStudentId(e.target.value)} disabled={!selectedClass} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md disabled:bg-slate-200">
+                        <option value="">Pilih Siswa</option>
+                        {studentsInClass.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-slate-700">Semester</label>
+                    <select value={selectedSemester} onChange={e => setSelectedSemester(Number(e.target.value) as 1|2)} className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                        <option value={1}>Semester 1</option>
+                        <option value={2}>Semester 2</option>
+                    </select>
+                </div>
+            </div>
+
+            {selectedStudent ? (
+                <div className="mt-6">
+                    <div className="flex justify-end gap-2 mb-4">
+                       <button onClick={handleExportWord} className="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                           <WordIcon />
+                           Export ke Word
+                       </button>
+                       <button onClick={handleExportExcel} className="inline-flex items-center gap-2 px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500">
+                           <ExcelIcon />
+                           Export ke Excel
+                       </button>
+                    </div>
+                    <div id="report-card-content" className="p-4 sm:p-6 border rounded-lg bg-white shadow-lg font-['Times_New_Roman'] text-black" style={{ direction: 'rtl' }}>
+                        <header className="text-center pb-4 mb-4">
+                            <h3 className="text-2xl font-bold" style={{ fontFamily: 'Traditional Arabic, serif' }}>
+                                تربية المعلمين والمعلمات الإسلامية الغزالي
+                            </h3>
+                            <h4 className="text-xl font-bold" style={{ fontFamily: 'Traditional Arabic, serif' }}>
+                                بمعهد التربية الإسلامية الحديثة
+                            </h4>
+                            <p className="text-sm">تشورغ - غونونغ - سندور - بوغور - جاوى الغربية</p>
+                            <hr className="my-2 border-t-2 border-black" />
+                            <h2 className="text-3xl font-bold mt-4" style={{ fontFamily: 'Traditional Arabic, serif' }}>كشف الدرجات</h2>
+                            <p className="text-lg font-semibold" style={{ fontFamily: 'Traditional Arabic, serif' }}>
+                                الامتحانات للفصل الدراسي الأول
+                            </p>
+                        </header>
+
+                        <div className="text-base mb-4 text-right">
+                            <div className="flex justify-between">
+                                <p style={{direction: 'ltr'}}><span className="font-semibold">{toHindiArabic(schoolInfo.academicYear.split(' / ')[1])} / {toHindiArabic(schoolInfo.academicYear.split(' / ')[0])}</span> : العام الدراسي</p>
+                                <p><span className="font-semibold">{selectedStudent.name}</span> : اسم</p>
+                            </div>
+                            <p className="text-left mt-1" style={{ direction: 'ltr' }}>Kelas: {selectedStudent.class}</p>
+                        </div>
+                        
+                        <table id="report-card-table" className="min-w-full border-collapse border border-black text-center" style={{ direction: 'ltr' }}>
+                            <thead className="bg-gray-100 font-bold">
+                                <tr className="text-right">
+                                    <th className="border border-black p-2 text-center">الدرجة</th>
+                                    <th className="border border-black p-2 text-left">Mata Pelajaran</th>
+                                    <th className="border border-black p-2">المواد الدراسية</th>
+                                    <th className="border border-black p-2 text-center">الرقم</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {studentGrades.map((grade, index) => (
+                                    <tr key={grade.subject}>
+                                        <td className="border border-black p-2 text-center font-semibold">{toHindiArabic(grade.score)}</td>
+                                        <td className="border border-black p-2 text-left">{grade.subject}</td>
+                                        <td className="border border-black p-2 text-right text-lg" style={{ fontFamily: 'Traditional Arabic, serif' }}>{SUBJECT_MAP[grade.subject] || grade.subject}</td>
+                                        <td className="border border-black p-2 text-center">{toHindiArabic(index + 1)}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                            <tfoot className="font-bold bg-gray-100">
+                                <tr>
+                                    <td className="border border-black p-2 text-center">{toHindiArabic(totalScore)}</td>
+                                    <td colSpan={2} className="border border-black p-2 text-right">المجموع</td>
+                                    <td className="border border-black p-2"></td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black p-2 text-center">{toHindiArabic(averageScore)}</td>
+                                    <td colSpan={2} className="border border-black p-2 text-right">النتيجة المعدلة</td>
+                                    <td className="border border-black p-2"></td>
+                                </tr>
+                                <tr>
+                                    <td className="border border-black p-2 text-center">-</td>
+                                    <td colSpan={2} className="border border-black p-2 text-right">المقام</td>
+                                    <td className="border border-black p-2"></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+
+                        <div className="mt-12 flex justify-between text-base text-center" style={{ fontFamily: 'Traditional Arabic, serif' }}>
+                            <div>
+                                <p>ولي الأمر</p>
+                                <br /><br /><br />
+                                <p className="font-bold underline">........................</p>
+                            </div>
+                            <div>
+                                <p>ولي الفصل</p>
+                                <br /><br /><br />
+                                <p className="font-bold underline">{homeroomTeacher?.name || 'N/A'}</p>
+                            </div>
+                        </div>
+                        <div className="mt-8 text-center" style={{ fontFamily: 'Traditional Arabic, serif' }}>
+                                <p>مدير المعهد</p>
+                                <br /><br /><br />
+                                <p className="font-bold underline">{schoolInfo.principal}</p>
+                        </div>
+                    </div>
+                </div>
+            ) : (
+                <div className="text-center py-10 px-4 bg-slate-50 rounded-lg">
+                    <p className="text-slate-500">Silakan pilih kelas dan siswa untuk menampilkan raport.</p>
+                </div>
+            )}
+        </div>
+    );
+};
+
+export default ReportCard;
