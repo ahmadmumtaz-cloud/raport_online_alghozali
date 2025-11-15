@@ -12,9 +12,16 @@ declare global {
 
 
 export const exportToWord = async (elementId: string, fileName: string, headerText: string) => {
+    if (!window.htmlDocx) {
+        alert('Gagal mengekspor ke Word. Pustaka ekspor tidak berhasil dimuat. Silakan coba muat ulang halaman atau periksa koneksi internet Anda.');
+        console.error('html-to-docx library is not loaded on the window object.');
+        return;
+    }
+
     const element = document.getElementById(elementId);
     if (!element) {
         console.error('Element not found!');
+        alert('Elemen untuk diekspor tidak ditemukan.');
         return;
     }
 
@@ -28,6 +35,7 @@ export const exportToWord = async (elementId: string, fileName: string, headerTe
         window.saveAs(fileBuffer, `${fileName}.docx`);
     } catch (error) {
         console.error('Error exporting to Word:', error);
+        alert(`Terjadi kesalahan saat mengekspor ke Word: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 };
 
