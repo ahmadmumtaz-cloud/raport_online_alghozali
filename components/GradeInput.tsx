@@ -23,7 +23,8 @@ const GradeInput: React.FC<GradeInputProps> = ({ currentTeacher, studentsByClass
                 g => g.class === selectedClass && g.subject === selectedSubject && g.semester === selectedSemester
             );
             const gradesMap = existingGrades.reduce((acc, grade) => {
-                const student = Object.values(studentsByClass).flat().find(s => s.studentId === grade.studentId);
+                // FIX: Explicitly type 's' to Student to resolve type inference error.
+                const student = Object.values(studentsByClass).flat().find((s: Student) => s.studentId === grade.studentId);
                 if (student) {
                     acc[student.studentId] = grade.score;
                 }
@@ -60,7 +61,8 @@ const GradeInput: React.FC<GradeInputProps> = ({ currentTeacher, studentsByClass
             teacherId: currentTeacher.id,
             class: selectedClass,
             semester: selectedSemester,
-            score,
+            // FIX: Ensure score is a number to match the Grade type.
+            score: Number(score),
         }));
         onSaveGrades(newGrades, selectedSubject, selectedClass);
     };

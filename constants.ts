@@ -165,21 +165,6 @@ const students4BPutra = [{"Nama Peserta":"ALIF MUHAMMAD FIRDAUS","NISN":10940083
 
 
 const allStudentData = [
-    { class: "6 D - IPS Putra", students: [
-      { "No": 1, "Nama Peserta": "AFDAL GUSTIAN PUTRA", "NISN": "100000001" },
-      { "No": 2, "Nama Peserta": "CAEZAR EL DIEN KADHAFIE", "NISN": "100000002" },
-      { "No": 3, "Nama Peserta": "JAJANG LESMANA", "NISN": "100000003" },
-      { "No": 4, "Nama Peserta": "MUHAMMAD ANWAR ALIF", "NISN": "100000004" },
-      { "No": 5, "Nama Peserta": "MUHAMMAD RHAFA FATHULLAH", "NISN": "100000005" },
-      { "No": 6, "Nama Peserta": "MUHAMMAD ZAKI", "NISN": "100000006" },
-      { "No": 7, "Nama Peserta": "MUHAMMAD ALPASHA KURNIAWAN", "NISN": "100000007" },
-      { "No": 8, "Nama Peserta": "MUHAMMAD FAIZ AZWAR", "NISN": "100000008" },
-      { "No": 9, "Nama Peserta": "MUHARRAM FAIZ", "NISN": "100000009" },
-      { "No": 10, "Nama Peserta": "RAJA HAFIDZ IHSAN", "NISN": "100000010" },
-      { "No": 11, "Nama Peserta": "RIZKY PRIBADI", "NISN": "100000011" },
-      { "No": 12, "Nama Peserta": "SAYYID ABDILLAH RAKATANI", "NISN": "100000012" },
-      { "No": 13, "Nama Peserta": "VAREL FAHRIANSYAH", "NISN": "100000013" }
-    ]},
     { class: "1 A Tahfidz Putri", students: [{"No":1,"Nama Peserta":"AFIQAH NAJLA SALSABILA","NISN":125778097},{"No":2,"Nama Peserta":"AGHNIYAA ALIFANI QUINITA","NISN":3124199711},{"No":3,"Nama Peserta":"AHDINA ZIDNA ILMA","NISN":124532582},{"No":4,"Nama Peserta":"AL VINA HERAWATI","NISN":3132863920},{"No":5,"Nama Peserta":"ALYA CITRA LESTARY","NISN":3127797141},{"No":6,"Nama Peserta":"AQILA CHAERUNNISA","NISN":3130268909},{"No":7,"Nama Peserta":"AQILA NATASYA ADELIA","NISN":135583930},{"No":8,"Nama Peserta":"AZAHRA AULIA PUTRI","NISN":131938558},{"No":9,"Nama Peserta":"CEVILLA SATRYANA","NISN":3132030456},{"No":10,"Nama Peserta":"FARIKA MUSLIMAH HAFSARI","NISN":128334650},{"No":11,"Nama Peserta":"FARIZA MAS ANDITYA PUTRI","NISN":132566111},{"No":12,"Nama Peserta":"FITRIA KHOIRUN NISA","NISN":3123507351},{"No":14,"Nama Peserta":"KAYSA RAMADHANI","NISN":3127747639},{"No":15,"Nama Peserta":"MARWA KHOIRUNISA","NISN":124924340},{"No":16,"Nama Peserta":"MECCADEENA SYAQILA FATURO","NISN":3132609515},{"No":17,"Nama Peserta":"NATASYA ZAHEERA ALYA","NISN":126751724},{"No":18,"Nama Peserta":"SYAHNAZ SYAFANA KAMELIA","NISN":3128473594},{"No":19,"Nama Peserta":"SYAHRANI SAFITRI","NISN":3123043260},{"No":20,"Nama Peserta":"VIREZYA SAKHI SYAFIYAH","NISN":3129943308},{"No":21,"Nama Peserta":"ZHAFIRA FAIZA SHOLAHUDDIN PUTRI","NISN":127247639},{"No":22,"Nama Peserta":"ZULHIZZA RAMADANI","NISN":3121781277}] },
     { class: "1 B Putri", students: [{"No":1,"Nama Peserta":"AFIKA KHOIRUNNISA","NISN":124496987},{"No":2,"Nama Peserta":"AFIQAH KHAIRUNNISA","NISN":3132025192},{"No":3,"Nama Peserta":"AIDA NURILMI MUTHMAINAH","NISN":3137793474},{"No":4,"Nama Peserta":"ALIYATU SOLIHA","NISN":131355989},{"No":5,"Nama Peserta":"ALVINA NOVA RISKIANI","NISN":3121916445},{"No":6,"Nama Peserta":"AMIRA ANINDYA PUTRI HADINATA","NISN":3121756791},{"No":7,"Nama Peserta":"AMIRA AZARIA RISQILAH","NISN":3127197219},{"No":8,"Nama Peserta":"DEWI ANGGRAENI","NISN":3123379891},{"No":9,"Nama Peserta":"JIHAN RAHEL FAIHA","NISN":132024498},{"No":10,"Nama Peserta":"MILA MAULANI","NISN":132275674},{"No":11,"Nama Peserta":"NADILLA PUTRI APRILIA","NISN":3131454075},{"No":12,"Nama Peserta":"NAJMA SYIFA","NISN":3121764100},{"No":13,"Nama Peserta":"Naura Hasna Nayla Setiawan","NISN":136525523},{"No":14,"Nama Peserta":"ORLIN RAUDHATUL AISY RAFIFAH","NISN":3132359172},{"No":15,"Nama Peserta":"RAISYA SALLSABILLA","NISN":137749651},{"No":16,"Nama Peserta":"SALSABILA ADE GUNAWAN","NISN":3133096449},{"No":17,"Nama Peserta":"SHAQILA AZZAHRA","NISN":3131107772},{"No":18,"Nama Peserta":"SILSYIFA AZMI NADIRA","NISN":3125028954},{"No":19,"Nama Peserta":"SYIFA NUR MUTHMAINNAH","NISN":3123614193},{"No":20,"Nama Peserta":"WAFIQ AZ-ZAHRA NUR AZIZAH","NISN":3137490834},{"No":21,"Nama Peserta":"ZAZKIA HUSNA KAMILA","NISN":3130289494}] },
     { class: "1 C Putri", students: [{"No":1,"Nama Peserta":"ADELLIA AULIA IZZATUNNISA","NISN":133871787},{"No":2,"Nama Peserta":"ALYA ADINDA PUTRI","NISN":3132439824},{"No":3,"Nama Peserta":"ANNISA MAULANI PUTRI","NISN":3122156035},{"No":4,"Nama Peserta":"BRILIEL IVANGKA HERYANTO","NISN":127110837},{"No":5,"Nama Peserta":"CUT SAFA ZASKIA","NISN":3121415400},{"No":6,"Nama Peserta":"HUMAIRA NUR AISHA","NISN":3135943681},{"No":7,"Nama Peserta":"KEYVANA KEISYA","NISN":134346543},{"No":8,"Nama Peserta":"KEYLA NADJWA BUDIYATMAN","NISN":119769409},{"No":9,"Nama Peserta":"KIRANA ASHA QINANTI","NISN":3133233278},{"No":10,"Nama Peserta":"LAILA FARDHATU RAMADHANI","NISN":122262443},{"No":11,"Nama Peserta":"LUTFIAH SUDRAJAT","NISN":3133909743},{"No":12,"Nama Peserta":"NABIILAH NUR FADIYAH","NISN":3135476849},{"No":13,"Nama Peserta":"NASYWA ACINTYA ARTANTI","NISN":3134709719},{"No":14,"Nama Peserta":"NATASYA KAINA KABILA","NISN":3132736407},{"No":15,"Nama Peserta":"NATASYA PUTRI PRIATNA","NISN":3128732139},{"No":16,"Nama Peserta":"NHIRA  APRIL SYADIFA","NISN":134469229},{"No":17,"Nama Peserta":"SAZKIA INAYAH","NISN":3128889711},{"No":18,"Nama Peserta":"SYIFA NUR ALFIAH","NISN":3122129344},{"No":19,"Nama Peserta":"TIARA IZZATUNNISA","NISN":132681363},{"No":20,"Nama Peserta":"WAFFA NUR ISTIKHOMAH","NISN":3121671742},{"No":21,"Nama Peserta":"ZAVIRA OKTAVIA","NISN":3129781979},{"No":22,"Nama Peserta":"ZURAINEDA RACHMA","NISN":3126891250}] },
@@ -265,50 +250,12 @@ export const INITIAL_HOMEROOM_TEACHERS: HomeroomTeacher[] = INITIAL_CLASSES.map(
     contact: `081234567${(800 + i).toString()}`,
 }));
 
-const ledgerSubjects = [
-  'Insya', 'B. Arab Lisan', 'Nahwu', 'Shorof', 'Balaghoh', 'Mutholaah', 
-  'Reading & Grammar', 'B Inggris Lisan', 'Tafsir', 'Tarbiyah', 
-  "Ulumul Qur'an", 'Ushul Fiqih', 'Fiqih', "Al-Qur'an & Ibadah Amaliya"
-];
-
-const ledgerStudents = allStudentData.find(c => c.class === "6 D - IPS Putra")?.students || [];
-const ledgerScores = [
-  [80, 81, 80, 74, 100, 82, 84, 80, 46, 78, 94, 90, 81, 72],
-  [50, 66, 72, 55, 40, 46, 40, 40, 41, 48, 62, 40, 72, 63],
-  [70, 74, 49, 56, 80, 53, 73, 78, 62, 78, 95, 87, 68, 70],
-  [75, 71, 47, 56, 60, 49, 76, 80, 30, 48, 66, 59, 87, 68],
-  [70, 83, 67, 63, 60, 72, 84, 78, 46, 73, 90, 85, 85, 73],
-  [70, 77, 58, 67, 70, 82, 72, 67, 63, 81, 90, 87, 82, 82],
-  [55, 72, 45, 53, 75, 59, 70, 60, 35, 51, 83, 58, 84, 72],
-  [85, 85, 78, 86, 75, 76, 82, 86, 50, 89, 93, 92, 90, 70],
-  [65, 71, 47, 52, 70, 49, 77, 82, 48, 56, 82, 72, 73, 71],
-  [70, 68, 46, 76, 70, 63, 72, 75, 52, 52, 88, 58, 78, 65],
-  [55, 59, 59, 50, 70, 41, 68, 70, 38, 77, 73, 45, 75, 60],
-  [65, 76, 70, 64, 70, 87, 88, 85, 37, 80, 89, 86, 88, 62],
-  [53, 54, 40, 40, 55, 50, 60, 65, 36, 44, 53, 43, 70, 62],
-];
-
-const ledgerGrades = ledgerStudents.flatMap((student, studentIndex) => {
-  return ledgerSubjects.map((subject, subjectIndex) => {
-    const teacher = INITIAL_TEACHERS.find(t => t.subjects.includes(subject));
-    return {
-      studentId: String(student.NISN),
-      subject: subject,
-      teacherId: teacher ? teacher.id : 'T000',
-      class: "6 D - IPS Putra",
-      semester: 1,
-      score: ledgerScores[studentIndex][subjectIndex],
-    } as Grade;
-  });
-});
-
 export const INITIAL_GRADES: Grade[] = [
     // Sample grades for a few students from the new data
     { studentId: "3122918252", subject: "AQIDAH", teacherId: INITIAL_TEACHERS.find(t=>t.name === "AHMAD FAUZI RAHMAN")!.id, class: "1 D Tahfidz Putra", semester: 1, score: 87 },
     { studentId: "3111332651", subject: "TAHFIDZ", teacherId: INITIAL_TEACHERS.find(t=>t.name === "NADRA, S.Ag")!.id, class: "2 E Putra", semester: 1, score: 91 },
     { studentId: "109327076", subject: "TAMRIN LUGHOH", teacherId: INITIAL_TEACHERS.find(t=>t.name === "SALEHA MUFIDA, S.Sos, M.Han")!.id, class: "3 B Putri", semester: 1, score: 85 },
     { studentId: "96612385", subject: "FIQIH TMMIA", teacherId: INITIAL_TEACHERS.find(t=>t.name === "NURLAILA, S.Ag")!.id, class: "4 A Putri", semester: 1, score: 88 },
-    ...ledgerGrades
 ];
 
 export const ALL_SEMESTERS = [1, 2];
