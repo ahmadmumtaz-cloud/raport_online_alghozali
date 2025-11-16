@@ -3,6 +3,7 @@ import { Student, Teacher, HomeroomTeacher } from '../types';
 import { parseJsonFile } from '../services/dataService';
 import DataFormModal, { FormConfig } from './DataFormModal';
 import { UndoIcon, RedoIcon } from './icons/UndoRedoIcons';
+import ConfirmationModal from './ConfirmationModal';
 
 interface DataManagementProps {
     students: Student[];
@@ -28,6 +29,11 @@ type ModalState = {
     data: any;
     config: FormConfig | null;
 };
+type DeletionState = {
+    isOpen: boolean;
+    id: string | null;
+    name: string | null;
+};
 
 const DataManagement: React.FC<DataManagementProps> = (props) => {
     const { 
@@ -38,7 +44,7 @@ const DataManagement: React.FC<DataManagementProps> = (props) => {
     } = props;
     const [activeTab, setActiveTab] = useState<ManagedTab>('students');
     const [modalState, setModalState] = useState<ModalState>({ isOpen: false, mode: 'add', data: null, config: null });
-    // FIX: Add state for bulk student add modal
+    const [deletionState, setDeletionState] = useState<DeletionState>({ isOpen: false, id: null, name: null });
     const [isBulkAddOpen, setIsBulkAddOpen] = useState(false);
     const [bulkAddText, setBulkAddText] = useState('');
     const [bulkAddClass, setBulkAddClass] = useState('');
@@ -107,18 +113,21 @@ const DataManagement: React.FC<DataManagementProps> = (props) => {
         handleCloseModal();
     };
 
-    const handleDelete = (id: string, name: string) => {
-        if (window.confirm(`Apakah Anda yakin ingin menghapus data "${name}"?`)) {
+    const handleDeleteRequest = (id: string, name: string) => {
+        setDeletionState({ isOpen: true, id, name });
+    };
+
+    const handleConfirmDelete = () => {
+        if (deletionState.id) {
             switch (activeTab) {
-                case 'students': onStudentAction('delete', id); break;
-                case 'teachers': onTeacherAction('delete', id); break;
-                case 'homeroom': onHomeroomAction('delete', id); break;
-                case 'subjects': onSubjectAction('delete', id); break; // Here id is the subject name
+                case 'students': onStudentAction('delete', deletionState.id); break;
+                case 'teachers': onTeacherAction('delete', deletionState.id); break;
+                case 'homeroom': onHomeroomAction('delete', deletionState.id); break;
+                case 'subjects': onSubjectAction('delete', deletionState.id); break; // Here id is the subject name
             }
         }
     };
     
-    // FIX: Add handler for bulk student add feature
     const handleBulkAdd = () => {
         if (!bulkAddClass.trim()) {
             alert('Silakan isi nama kelas terlebih dahulu.');
@@ -198,7 +207,6 @@ const DataManagement: React.FC<DataManagementProps> = (props) => {
         if(fileInputRef.current) fileInputRef.current.value = "";
     };
 
-    // FIX: Add modal for bulk student add
     const renderBulkAddModal = () => (
         <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex justify-center items-start pt-10 overflow-y-auto">
             <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl m-4">
@@ -257,7 +265,7 @@ const DataManagement: React.FC<DataManagementProps> = (props) => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{s.class}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                                     <button onClick={() => handleOpenModal('edit', s)} className={editButtonClasses}>Edit</button>
-                                    <button onClick={() => handleDelete(s.id, s.name)} className={deleteButtonClasses}>Hapus</button>
+                                    <button onClick={() => handleDeleteRequest(s.id, s.name)} className={deleteButtonClasses}>Hapus</button>
                                 </td>
                             </tr>
                         ))}
@@ -281,7 +289,7 @@ const DataManagement: React.FC<DataManagementProps> = (props) => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{t.subjects?.join(', ')}</td>
                                  <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                                     <button onClick={() => handleOpenModal('edit', t)} className={editButtonClasses}>Edit</button>
-                                    <button onClick={() => handleDelete(t.id, t.name)} className={deleteButtonClasses}>Hapus</button>
+                                    <button onClick={() => handleDeleteRequest(t.id, t.name)} className={deleteButtonClasses}>Hapus</button>
                                 </td>
                             </tr>
                         ))}
@@ -307,7 +315,7 @@ const DataManagement: React.FC<DataManagementProps> = (props) => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-500">{h.contact}</td>
                                  <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                                     <button onClick={() => handleOpenModal('edit', h)} className={editButtonClasses}>Edit</button>
-                                    <button onClick={() => handleDelete(h.id, h.name)} className={deleteButtonClasses}>Hapus</button>
+                                    <button onClick={() => handleDeleteRequest(h.id, h.name)} className={deleteButtonClasses}>Hapus</button>
                                 </td>
                             </tr>
                         ))}
@@ -328,7 +336,7 @@ const DataManagement: React.FC<DataManagementProps> = (props) => {
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900">{s}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2">
                                     <button onClick={() => handleOpenModal('edit', s)} className={editButtonClasses}>Edit</button>
-                                    <button onClick={() => handleDelete(s, s)} className={deleteButtonClasses}>Hapus</button>
+                                    <button onClick={() => handleDeleteRequest(s, s)} className={deleteButtonClasses}>Hapus</button>
                                 </td>
                             </tr>
                         ))}
@@ -351,8 +359,14 @@ const DataManagement: React.FC<DataManagementProps> = (props) => {
                     mode={modalState.mode}
                 />
             )}
-            {/* FIX: Render the bulk add modal when state is true */}
             {isBulkAddOpen && renderBulkAddModal()}
+            <ConfirmationModal
+                isOpen={deletionState.isOpen}
+                onClose={() => setDeletionState({ isOpen: false, id: null, name: null })}
+                onConfirm={handleConfirmDelete}
+                title={`Konfirmasi Penghapusan ${formConfigs[activeTab].title}`}
+                message={`Apakah Anda yakin ingin menghapus data "${deletionState.name}"? Tindakan ini tidak dapat diurungkan.`}
+            />
             <input type="file" ref={fileInputRef} className="hidden" accept=".json" onChange={handleFileUpload} />
 
             <h2 className="text-2xl font-bold text-slate-800 mb-4">Manajemen Data</h2>

@@ -1,55 +1,18 @@
 {
-  "name": "undici-types",
-  "version": "6.21.0",
-  "description": "A stand-alone types package for Undici",
-  "homepage": "https://undici.nodejs.org",
-  "bugs": {
-    "url": "https://github.com/nodejs/undici/issues"
+  "name": "raport-online-al-ghozali",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "echo \"Run a local server to serve index.html\" && exit 1",
+    "build": "echo \"No build step configured\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/nodejs/undici.git"
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
   },
-  "license": "MIT",
-  "types": "index.d.ts",
-  "files": [
-    "*.d.ts"
-  ],
-  "contributors": [
-    {
-      "name": "Daniele Belardi",
-      "url": "https://github.com/dnlup",
-      "author": true
-    },
-    {
-      "name": "Ethan Arrowood",
-      "url": "https://github.com/ethan-arrowood",
-      "author": true
-    },
-    {
-      "name": "Matteo Collina",
-      "url": "https://github.com/mcollina",
-      "author": true
-    },
-    {
-      "name": "Matthew Aitken",
-      "url": "https://github.com/KhafraDev",
-      "author": true
-    },
-    {
-      "name": "Robert Nagy",
-      "url": "https://github.com/ronag",
-      "author": true
-    },
-    {
-      "name": "Szymon Marczak",
-      "url": "https://github.com/szmarczak",
-      "author": true
-    },
-    {
-      "name": "Tomas Della Vedova",
-      "url": "https://github.com/delvedor",
-      "author": true
-    }
-  ]
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0"
+  }
 }

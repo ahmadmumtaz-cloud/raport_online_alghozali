@@ -74,12 +74,12 @@ const DataFormModal: React.FC<DataFormModalProps> = ({ isOpen, onClose, onSave, 
                             onChange={handleMultiSelectChange}
                             className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md h-32"
                         >
-                            {/* FIX: Explicitly type 'opt' as string to resolve TypeScript error where it's inferred as 'unknown', preventing access to 'value'. */}
+                            {/* FIX: Explicitly type 'opt' as string to resolve TypeScript error where it's inferred as 'unknown'. */}
                             {field.options?.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
                     </div>
                 );
-            // FIX: Add case for 'select' field type for dropdowns
+            // FIX: Add case for 'select' field type for dropdowns.
             case 'select':
                  return (
                     <div key={field.name}>
