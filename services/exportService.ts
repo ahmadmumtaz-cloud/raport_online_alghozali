@@ -10,11 +10,40 @@ declare global {
     }
 }
 
+/**
+ * Helper function to wait for a global variable to become available on the window object.
+ * This is useful for CDN-loaded libraries that might not be ready immediately.
+ * @param name The name of the global variable to wait for.
+ * @param timeout The maximum time to wait in milliseconds.
+ * @returns A promise that resolves when the variable is found, or rejects on timeout.
+ */
+const waitForGlobal = (name: string, timeout = 5000): Promise<void> => {
+    return new Promise((resolve, reject) => {
+        let attempts = 0;
+        const interval = 100;
+        const maxAttempts = timeout / interval;
+
+        const check = () => {
+            if ((window as any)[name]) {
+                resolve();
+            } else if (attempts < maxAttempts) {
+                attempts++;
+                setTimeout(check, interval);
+            } else {
+                reject(new Error(`Failed to load library: Global variable "${name}" not found after ${timeout}ms.`));
+            }
+        };
+        check();
+    });
+};
+
 
 export const exportToWord = async (contentOrElementId: string, fileName:string, headerText: string, isHtmlString = false) => {
-    if (!window.htmlDocx) {
+    try {
+        await waitForGlobal('htmlDocx');
+    } catch (error) {
+        console.error(error);
         alert('Gagal mengekspor ke Word. Pustaka ekspor tidak berhasil dimuat. Silakan coba muat ulang halaman atau periksa koneksi internet Anda.');
-        console.error('html-to-docx library is not loaded on the window object.');
         return;
     }
 

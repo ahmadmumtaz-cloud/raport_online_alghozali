@@ -1,5 +1,5 @@
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { Grade, AppView, User, HistoryLog, Student, HomeroomTeacher } from './types';
 import { 
     INITIAL_GRADES, SCHOOL_INFO, INITIAL_STUDENTS, INITIAL_TEACHERS, INITIAL_HOMEROOM_TEACHERS, 
@@ -23,26 +23,90 @@ type DataState = {
     grades: Grade[];
 };
 
+// Type for the entire app state to be persisted
+type AppState = {
+    historyStack: DataState[];
+    historyIndex: number;
+    history: HistoryLog[];
+};
+
+const LOCAL_STORAGE_KEY = 'raportAlGhozaliAppState';
+
 const App: React.FC = () => {
-    // --- STATE MANAGEMENT ---
+    // --- STATE MANAGEMENT & PERSISTENCE ---
+
+    // A single function to load and parse the state from localStorage
+    const loadStateFromLocalStorage = (): AppState | null => {
+        try {
+            const savedStateJSON = localStorage.getItem(LOCAL_STORAGE_KEY);
+            if (!savedStateJSON) return null;
+
+            const savedState = JSON.parse(savedStateJSON);
+
+            // Basic validation
+            if (
+                !savedState.historyStack || !Array.isArray(savedState.historyStack) || savedState.historyStack.length === 0 ||
+                typeof savedState.historyIndex !== 'number'
+            ) {
+                console.warn("Invalid data found in localStorage. Resetting to default.");
+                localStorage.removeItem(LOCAL_STORAGE_KEY);
+                return null;
+            }
+            
+            // Re-hydrate Date objects in the history log from their string representation
+            if (savedState.history && Array.isArray(savedState.history)) {
+                savedState.history = savedState.history.map((log: any) => ({
+                    ...log,
+                    timestamp: new Date(log.timestamp),
+                }));
+            }
+
+            return savedState;
+
+        } catch (error) {
+            console.error("Failed to load state from localStorage. Resetting.", error);
+            localStorage.removeItem(LOCAL_STORAGE_KEY); // Clear corrupted data
+            return null;
+        }
+    };
+
+    const initialAppState = loadStateFromLocalStorage();
+
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [view, setView] = useState<AppView>(AppView.DASHBOARD);
     
     // Undo/Redo history state - SINGLE SOURCE OF TRUTH for all undoable data
-    const [historyStack, setHistoryStack] = useState<DataState[]>([{
-        students: INITIAL_STUDENTS,
-        teachers: INITIAL_TEACHERS,
-        homeroomTeachers: INITIAL_HOMEROOM_TEACHERS,
-        subjects: INITIAL_SUBJECTS,
-        grades: INITIAL_GRADES,
-    }]);
-    const [historyIndex, setHistoryIndex] = useState(0);
+    const [historyStack, setHistoryStack] = useState<DataState[]>(
+        initialAppState?.historyStack || [{
+            students: INITIAL_STUDENTS,
+            teachers: INITIAL_TEACHERS,
+            homeroomTeachers: INITIAL_HOMEROOM_TEACHERS,
+            subjects: INITIAL_SUBJECTS,
+            grades: INITIAL_GRADES,
+        }]
+    );
+    const [historyIndex, setHistoryIndex] = useState<number>(initialAppState?.historyIndex ?? 0);
 
     // All undoable data is derived directly from the history stack
     const { students, teachers, homeroomTeachers, subjects, grades } = historyStack[historyIndex];
     
-    // Other states not part of undo/redo
-    const [history, setHistory] = useState<HistoryLog[]>([]);
+    // Other states not part of undo/redo, but we will persist it
+    const [history, setHistory] = useState<HistoryLog[]>(initialAppState?.history || []);
+
+    // Effect to save the entire app state to localStorage whenever it changes
+    useEffect(() => {
+        try {
+            const stateToSave: AppState = {
+                historyStack,
+                historyIndex,
+                history,
+            };
+            localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(stateToSave));
+        } catch (error) {
+            console.error("Could not save state to localStorage", error);
+        }
+    }, [historyStack, historyIndex, history]);
+
 
     // --- HISTORY LOGGING ---
     const addHistoryLog = useCallback((action: string, details: string) => {

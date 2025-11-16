@@ -79,7 +79,6 @@ const DataFormModal: React.FC<DataFormModalProps> = ({ isOpen, onClose, onSave, 
                         </select>
                     </div>
                 );
-            // FIX: Add case for 'select' field type for dropdowns.
             case 'select':
                  return (
                     <div key={field.name}>
