@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useMemo } from 'react';
 import { Grade, AppView, User, HistoryLog, Student, HomeroomTeacher } from './types';
 import { 
@@ -18,6 +19,8 @@ type DataState = {
     students: Student[];
     teachers: (User & { role: 'teacher' })[];
     homeroomTeachers: HomeroomTeacher[];
+    subjects: string[];
+    grades: Grade[];
 };
 
 const App: React.FC = () => {
@@ -25,20 +28,20 @@ const App: React.FC = () => {
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [view, setView] = useState<AppView>(AppView.DASHBOARD);
     
-    // Undo/Redo history state - SINGLE SOURCE OF TRUTH for students, teachers, homeroom
+    // Undo/Redo history state - SINGLE SOURCE OF TRUTH for all undoable data
     const [historyStack, setHistoryStack] = useState<DataState[]>([{
         students: INITIAL_STUDENTS,
         teachers: INITIAL_TEACHERS,
         homeroomTeachers: INITIAL_HOMEROOM_TEACHERS,
+        subjects: INITIAL_SUBJECTS,
+        grades: INITIAL_GRADES,
     }]);
     const [historyIndex, setHistoryIndex] = useState(0);
 
-    // Data master states are now derived directly from the history stack
-    const { students, teachers, homeroomTeachers } = historyStack[historyIndex];
+    // All undoable data is derived directly from the history stack
+    const { students, teachers, homeroomTeachers, subjects, grades } = historyStack[historyIndex];
     
     // Other states not part of undo/redo
-    const [subjects, setSubjects] = useState<string[]>(INITIAL_SUBJECTS);
-    const [grades, setGrades] = useState<Grade[]>(INITIAL_GRADES);
     const [history, setHistory] = useState<HistoryLog[]>([]);
 
     // --- HISTORY LOGGING ---
@@ -59,6 +62,8 @@ const App: React.FC = () => {
             students: updates.students ?? currentState.students,
             teachers: updates.teachers ?? currentState.teachers,
             homeroomTeachers: updates.homeroomTeachers ?? currentState.homeroomTeachers,
+            subjects: updates.subjects ?? currentState.subjects,
+            grades: updates.grades ?? currentState.grades,
         };
 
         const newHistoryStack = historyStack.slice(0, historyIndex + 1);
@@ -110,20 +115,18 @@ const App: React.FC = () => {
 
     // --- CRUD & DATA HANDLERS ---
     const handleSaveGrades = useCallback((newGrades: Grade[], subject: string, studentClass: string) => {
-        setGrades(prevGrades => {
-            const updatedGrades = [...prevGrades];
-            newGrades.forEach(newGrade => {
-                const index = updatedGrades.findIndex(
-                    g => g.studentId === newGrade.studentId && g.subject === newGrade.subject && g.semester === newGrade.semester
-                );
-                if (index !== -1) updatedGrades[index] = newGrade;
-                else updatedGrades.push(newGrade);
-            });
-            return updatedGrades;
+        const updatedGrades = [...grades];
+        newGrades.forEach(newGrade => {
+            const index = updatedGrades.findIndex(
+                g => g.studentId === newGrade.studentId && g.subject === newGrade.subject && g.semester === newGrade.semester
+            );
+            if (index !== -1) updatedGrades[index] = newGrade;
+            else updatedGrades.push(newGrade);
         });
+        updateDataAndPushHistory({ grades: updatedGrades });
         addHistoryLog('Simpan Nilai', `Menyimpan ${newGrades.length} nilai untuk mapel ${subject} di kelas ${studentClass}.`);
         alert('Nilai berhasil disimpan!');
-    }, [addHistoryLog]);
+    }, [addHistoryLog, grades, updateDataAndPushHistory]);
     
     // Student CRUD
     const handleStudentAction = (action: 'add' | 'update' | 'delete', data: Student | string) => {
@@ -187,7 +190,7 @@ const App: React.FC = () => {
                 alert(`Mata pelajaran "${newSubject}" sudah ada.`);
                 return;
             }
-            setSubjects(prev => [...prev, newSubject].sort());
+            updateDataAndPushHistory({ subjects: [...subjects, newSubject].sort() });
             addHistoryLog('Tambah Mapel', `Menambahkan mata pelajaran baru: ${newSubject}`);
         } else if (action === 'update') {
             const { oldName, newName } = data as { oldName: string, newName: string };
@@ -195,11 +198,10 @@ const App: React.FC = () => {
                 alert(`Mata pelajaran "${newName}" sudah ada.`);
                 return;
             }
-            // Cascading update for subjects (now undoable for teachers)
-            setSubjects(prev => prev.map(s => s === oldName ? newName : s).sort());
+            const newSubjects = subjects.map(s => s === oldName ? newName : s).sort();
             const newTeachers = teachers.map(t => ({...t, subjects: t.subjects.map(s => s === oldName ? newName : s)}));
-            updateDataAndPushHistory({ teachers: newTeachers });
-            setGrades(prev => prev.map(g => g.subject === oldName ? {...g, subject: newName} : g));
+            const newGrades = grades.map(g => g.subject === oldName ? {...g, subject: newName} : g);
+            updateDataAndPushHistory({ subjects: newSubjects, teachers: newTeachers, grades: newGrades });
             addHistoryLog('Update Mapel', `Mengubah nama mapel dari "${oldName}" menjadi "${newName}"`);
 
         } else if (action === 'delete') {
@@ -213,7 +215,7 @@ const App: React.FC = () => {
                 return;
             }
             
-            setSubjects(prev => prev.filter(s => s !== subjectToDelete));
+            updateDataAndPushHistory({ subjects: subjects.filter(s => s !== subjectToDelete) });
             addHistoryLog('Hapus Mapel', `Menghapus mata pelajaran: ${subjectToDelete}`);
         }
     };

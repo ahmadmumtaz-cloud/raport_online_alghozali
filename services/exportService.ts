@@ -11,22 +11,28 @@ declare global {
 }
 
 
-export const exportToWord = async (elementId: string, fileName: string, headerText: string) => {
+export const exportToWord = async (contentOrElementId: string, fileName:string, headerText: string, isHtmlString = false) => {
     if (!window.htmlDocx) {
         alert('Gagal mengekspor ke Word. Pustaka ekspor tidak berhasil dimuat. Silakan coba muat ulang halaman atau periksa koneksi internet Anda.');
         console.error('html-to-docx library is not loaded on the window object.');
         return;
     }
 
-    const element = document.getElementById(elementId);
-    if (!element) {
-        console.error('Element not found!');
-        alert('Elemen untuk diekspor tidak ditemukan.');
-        return;
+    let content = '';
+    if (isHtmlString) {
+        content = contentOrElementId;
+    } else {
+        const element = document.getElementById(contentOrElementId);
+        if (!element) {
+            console.error('Element not found!');
+            alert('Elemen untuk diekspor tidak ditemukan.');
+            return;
+        }
+        content = element.innerHTML;
     }
 
+
     try {
-        const content = element.innerHTML;
         const fileBuffer = await window.htmlDocx.asBlob(content, {
              orientation: 'portrait',
              margins: { top: 720, right: 720, bottom: 720, left: 720 }, // 1 inch margins

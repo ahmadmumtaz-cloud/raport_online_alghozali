@@ -1,3 +1,4 @@
+
 export interface School {
   name: string;
   address: string;
@@ -19,7 +20,7 @@ export type User = {
   class: string;
 });
 
-// FIX: Define and export the Teacher type as a specific User role to resolve import errors.
+// Fix: Define and export the Teacher type as a specific User role to resolve import errors.
 export type Teacher = User & { role: 'teacher' };
 
 

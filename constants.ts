@@ -326,6 +326,37 @@ const students1FPutra: StudentRaw[] = [
     {"No":32,"Nama Peserta":"SHABILAL ALIF AL RISKI","NISN":3139763409,"L/P":"L"}
 ];
 
+const students3IntA: StudentRaw[] = [
+    {"No":1,"Nama Peserta":"ANNISA PUTRI KHAYLA","NISN":87842861,"L/P":"P"},
+    {"No":2,"Nama Peserta":"AVIFAH TRIUTAMI","NISN":83239075,"L/P":"P"},
+    {"No":3,"Nama Peserta":"AZKA ANISA MA'ARIFA","NISN":87068742,"L/P":"P"},
+    {"No":4,"Nama Peserta":"ERMITHA ZAHRA FAUZIAH","NISN":85457815,"L/P":"P"},
+    {"No":5,"Nama Peserta":"FARAH AZKIA BILQIS","NISN":83704986,"L/P":"P"},
+    {"No":6,"Nama Peserta":"RATU KHANZA AULIA","NISN":82460927,"L/P":"P"},
+    {"No":7,"Nama Peserta":"ACHMAD RAKA DINEZA","NISN":89300917,"L/P":"L"},
+    {"No":8,"Nama Peserta":"ALIFAN HAFIDZ ATTHAARIQ","NISN":88488573,"L/P":"L"},
+    {"No":9,"Nama Peserta":"BAYU APRIL NUR SABIL LATIF","NISN":89639778,"L/P":"L"},
+    {"No":10,"Nama Peserta":"BUDI SETIAWAN","NISN":89991009,"L/P":"L"},
+    {"No":11,"Nama Peserta":"MUHAMAD FAZRI","NISN":81486754,"L/P":"L"},
+    {"No":12,"Nama Peserta":"SYAWALUDIN AL-AYUBI","NISN":79874742,"L/P":"L"}
+];
+
+const students3IntB: StudentRaw[] = [
+    {"No":1,"Nama Peserta":"AZKA NABILA HIDAYAT","NISN":83393480,"L/P":"P"},
+    {"No":2,"Nama Peserta":"HANIFAH KHAYYIRAH SALIM","NISN":84970639,"L/P":"P"},
+    {"No":3,"Nama Peserta":"KEISHA ALIKA","NISN":84673160,"L/P":"P"},
+    {"No":4,"Nama Peserta":"KEYSYA MAULIDINI","NISN":84637748,"L/P":"P"},
+    {"No":5,"Nama Peserta":"REVI YUSNIA ALVIANI","NISN":83925627,"L/P":"P"},
+    {"No":6,"Nama Peserta":"ROSSA","NISN":71467820,"L/P":"P"},
+    {"No":7,"Nama Peserta":"YUNITA FADZIAH","NISN":88594774,"L/P":"P"},
+    {"No":8,"Nama Peserta":"RADITYO ADHATAMA BUNGIN","NISN":77608428,"L/P":"L"},
+    {"No":9,"Nama Peserta":"RAYHAN ATILLA RHMATULLOH","NISN":86498768,"L/P":"L"},
+    {"No":10,"Nama Peserta":"REZA ADI SYAPUTRA","NISN":74430904,"L/P":"L"},
+    {"No":11,"Nama Peserta":"SAHEL NAEEM OCTARA","NISN":87562753,"L/P":"L"},
+    {"No":12,"Nama Peserta":"SYAHRUL MUKHAROM ASKY","NISN":3089290343,"L/P":"L"},
+    {"No":13,"Nama Peserta":"MUHAMAD FAISHAL RASYDAN AZIZ","NISN":86872933,"L/P":"L"}
+];
+
 const students6APutri: StudentRaw[] = [
     {"No":1,"Nama Peserta":"AFRA NINDITA SALSABILA","NISN":81872758,"L/P":"P"},
     {"No":2,"Nama Peserta":"ALYA FADILA","NISN":86487899,"L/P":"P"},
@@ -447,6 +478,8 @@ export const INITIAL_STUDENTS: Student[] = [
     ...students1DPutra.map(createStudent('1 D - Putra')),
     ...students1EPutra.map(createStudent('1 E - Putra')),
     ...students1FPutra.map(createStudent('1 F - Putra')),
+    ...students3IntA.map(createStudent('3 INTENSIF A')),
+    ...students3IntB.map(createStudent('3 INTENSIF B')),
     ...students6APutri.map(createStudent('6 A - IPA Putri')),
     ...students6BPutri.map(createStudent('6 B - IPS Putri')),
     ...students6CPutra.map(createStudent('6 C - IPA Putra')),
@@ -458,8 +491,8 @@ export const INITIAL_HOMEROOM_TEACHERS: HomeroomTeacher[] = [
     { id: "HR002", name: "Nailul Kunni Furoida, S.Gz", class: "1 INT B", contact: "081200000002" },
     { id: "HR003", name: "Lulu Zahrotun Nisa, S.Pd", class: "2 INT A", contact: "081200000003" },
     { id: "HR004", name: "Khairil Fahmi, S.Pd", class: "2 INT B", contact: "081200000004" },
-    { id: "HR005", name: "Sadam Hamzah, S.H.I", class: "3 INT A", contact: "081200000005" },
-    { id: "HR006", name: "Doni Subiyanto, S.E", class: "3 INT B", contact: "081200000006" },
+    { id: "HR005", name: "Sadam Hamzah, S.H.I", class: "3 INTENSIF A", contact: "081200000005" },
+    { id: "HR006", name: "Doni Subiyanto, S.E", class: "3 INTENSIF B", contact: "081200000006" },
     { id: "HR013", name: "Ir. Rahmawati, M.Pd", class: "6 A - IPA Putri", contact: "081200000013" },
     { id: "HR014", name: "Hj. Saleha Mufida, S.Sos, M.Han", class: "6 B - IPS Putri", contact: "081200000014" },
     { id: "HR015", name: "Fadhilah, S.Pd", class: "6 C - IPA Putra", contact: "081200000015" },
