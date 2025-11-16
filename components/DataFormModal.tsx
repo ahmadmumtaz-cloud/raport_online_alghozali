@@ -74,7 +74,7 @@ const DataFormModal: React.FC<DataFormModalProps> = ({ isOpen, onClose, onSave, 
                             onChange={handleMultiSelectChange}
                             className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md h-32"
                         >
-                            {/* FIX: Explicitly type 'opt' as string to fix type inference issue. */}
+                            {/* FIX: Explicitly type 'opt' as string to resolve TypeScript error where it's inferred as 'unknown', preventing access to 'value'. */}
                             {field.options?.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
                     </div>
@@ -93,7 +93,8 @@ const DataFormModal: React.FC<DataFormModalProps> = ({ isOpen, onClose, onSave, 
                             className="mt-1 block w-full pl-3 pr-10 py-2 text-base border-slate-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                         >
                             <option value="" disabled>Pilih salah satu</option>
-                            {field.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                            {/* FIX: Explicitly type 'opt' as string to resolve TypeScript error where it's inferred as 'unknown'. */}
+                            {field.options?.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
                         </select>
                     </div>
                 );

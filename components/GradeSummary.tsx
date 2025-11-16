@@ -124,7 +124,7 @@ const GradeSummary: React.FC<GradeSummaryProps> = ({ grades, subjects, classes, 
                                 <tr key={data.studentId}>
                                     <td className="px-3 py-2 whitespace-nowrap text-sm text-slate-500 border">{index + 1}</td>
                                     <td className="px-6 py-2 whitespace-nowrap text-sm font-medium text-slate-900 border">{data.studentName}</td>
-                                    {/* FIX: Explicitly type 'sub' to string to fix index type error. */}
+                                    {/* FIX: Explicitly type 'sub' as string to resolve TypeScript error where it's inferred as 'unknown' and cannot be used as an index type. */}
                                     {ledgerData.subjects.map((sub: string) => <td key={sub} className="px-2 py-2 text-center text-sm text-slate-600 border">{data.scores[sub] ?? '-'}</td>)}
                                     <td className="px-2 py-2 text-center text-sm font-bold text-slate-800 bg-yellow-100 border">{data.total}</td>
                                     <td className="px-2 py-2 text-center text-sm font-bold text-slate-800 bg-yellow-100 border">{data.average.toFixed(2)}</td>

@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Student, Teacher, HomeroomTeacher } from '../types';
 import { parseJsonFile } from '../services/dataService';
 import DataFormModal, { FormConfig } from './DataFormModal';
+import { UndoIcon, RedoIcon } from './icons/UndoRedoIcons';
 
 interface DataManagementProps {
     students: Student[];
@@ -12,10 +13,12 @@ interface DataManagementProps {
     onTeacherAction: (action: 'add' | 'update' | 'delete', data: Teacher | string) => void;
     onHomeroomAction: (action: 'add' | 'update' | 'delete', data: HomeroomTeacher | string) => void;
     onSubjectAction: (action: 'add' | 'update' | 'delete', data: { oldName: string, newName: string } | string) => void;
-    setStudents: React.Dispatch<React.SetStateAction<Student[]>>;
-    setTeachers: React.Dispatch<React.SetStateAction<Teacher[]>>;
-    setHomeroomTeachers: React.Dispatch<React.SetStateAction<HomeroomTeacher[]>>;
+    onBulkDataChange: (dataType: 'students' | 'teachers' | 'homeroom', data: any[]) => void;
     addHistoryLog: (action: string, details: string) => void;
+    onUndo: () => void;
+    onRedo: () => void;
+    canUndo: boolean;
+    canRedo: boolean;
 }
 
 type ManagedTab = 'students' | 'teachers' | 'homeroom' | 'subjects';
@@ -30,7 +33,8 @@ const DataManagement: React.FC<DataManagementProps> = (props) => {
     const { 
         students, teachers, homeroomTeachers, subjects,
         onStudentAction, onTeacherAction, onHomeroomAction, onSubjectAction,
-        setStudents, setTeachers, setHomeroomTeachers, addHistoryLog 
+        onBulkDataChange, addHistoryLog,
+        onUndo, onRedo, canUndo, canRedo
     } = props;
     const [activeTab, setActiveTab] = useState<ManagedTab>('students');
     const [modalState, setModalState] = useState<ModalState>({ isOpen: false, mode: 'add', data: null, config: null });
@@ -159,7 +163,7 @@ const DataManagement: React.FC<DataManagementProps> = (props) => {
         
         if (newStudents.length > 0) {
             const addedStudents = newStudents.map((s, i) => ({...s, id: `S${Date.now() + i}`}));
-            setStudents(prev => [...prev, ...addedStudents].sort((a, b) => a.name.localeCompare(b.name)));
+            onBulkDataChange('students', [...students, ...addedStudents].sort((a, b) => a.name.localeCompare(b.name)));
             addHistoryLog('Tambah Siswa Massal', `Menambahkan ${addedStudents.length} siswa baru ke kelas ${bulkAddClass.trim()}.`);
             setIsBulkAddOpen(false);
             setBulkAddText('');
@@ -176,10 +180,9 @@ const DataManagement: React.FC<DataManagementProps> = (props) => {
             const data = await parseJsonFile(file);
             let count = 0;
             switch (activeTab) {
-                case 'students': setStudents(data as Student[]); count = (data as Student[]).length; break;
-                case 'teachers': setTeachers(data as Teacher[]); count = (data as Teacher[]).length; break;
-                case 'homeroom': setHomeroomTeachers(data as HomeroomTeacher[]); count = (data as HomeroomTeacher[]).length; break;
-                // Note: Upload for subjects is not implemented as it's a simple string array
+                case 'students': onBulkDataChange('students', data as Student[]); count = (data as Student[]).length; break;
+                case 'teachers': onBulkDataChange('teachers', data as Teacher[]); count = (data as Teacher[]).length; break;
+                case 'homeroom': onBulkDataChange('homeroom', data as HomeroomTeacher[]); count = (data as HomeroomTeacher[]).length; break;
             }
             if (activeTab !== 'subjects') {
                 addHistoryLog(`Upload Data ${formConfigs[activeTab].title}`, `Berhasil mengunggah ${count} data dari file ${file.name}`);
@@ -362,7 +365,26 @@ const DataManagement: React.FC<DataManagementProps> = (props) => {
                     <TabButton tab="subjects" label="Mata Pelajaran" activeTab={activeTab} setActiveTab={setActiveTab} />
                 </div>
                 <div className="flex items-center gap-2 mt-4 sm:mt-0">
-                    {/* FIX: Add button for bulk student add feature */}
+                    {activeTab !== 'subjects' && (
+                        <>
+                            <button 
+                                onClick={onUndo} 
+                                disabled={!canUndo}
+                                className="px-3 py-2 text-sm font-medium rounded-md text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Undo"
+                            >
+                                <UndoIcon />
+                            </button>
+                             <button 
+                                onClick={onRedo} 
+                                disabled={!canRedo}
+                                className="px-3 py-2 text-sm font-medium rounded-md text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                title="Redo"
+                            >
+                                <RedoIcon />
+                            </button>
+                        </>
+                    )}
                     {activeTab === 'students' && (
                         <button 
                             onClick={() => setIsBulkAddOpen(true)} 

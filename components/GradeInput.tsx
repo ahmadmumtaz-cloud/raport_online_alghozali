@@ -23,8 +23,9 @@ const GradeInput: React.FC<GradeInputProps> = ({ currentTeacher, studentsByClass
                 g => g.class === selectedClass && g.subject === selectedSubject && g.semester === selectedSemester
             );
             const gradesMap = existingGrades.reduce((acc, grade) => {
-                // FIX: Explicitly type 's' to Student to resolve type inference error.
-                const student = Object.values(studentsByClass).flat().find((s: Student) => s.studentId === grade.studentId);
+                // FIX: Use the already filtered studentsInClass array to find the student.
+                // This is more efficient and avoids potential type inference issues with Object.values().flat().
+                const student = studentsInClass.find(s => s.studentId === grade.studentId);
                 if (student) {
                     acc[student.studentId] = grade.score;
                 }
@@ -34,7 +35,7 @@ const GradeInput: React.FC<GradeInputProps> = ({ currentTeacher, studentsByClass
         } else {
             setGrades({});
         }
-    }, [selectedClass, selectedSubject, selectedSemester, initialGrades, studentsByClass]);
+    }, [selectedClass, selectedSubject, selectedSemester, initialGrades, studentsByClass, studentsInClass]);
 
 
     const handleGradeChange = (studentId: string, score: string) => {

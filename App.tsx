@@ -13,21 +13,75 @@ import DataManagement from './components/DataManagement';
 import HistoryLogView from './components/HistoryLogView';
 import Login from './components/Login';
 
-// Helper to get a typed user from the generic list
-const findTeacher = (id: string) => INITIAL_TEACHERS.find(t => t.id === id);
+// Type for a snapshot of the data state for undo/redo
+type DataState = {
+    students: Student[];
+    teachers: (User & { role: 'teacher' })[];
+    homeroomTeachers: HomeroomTeacher[];
+};
 
 const App: React.FC = () => {
     // --- STATE MANAGEMENT ---
     const [currentUser, setCurrentUser] = useState<User | null>(null);
     const [view, setView] = useState<AppView>(AppView.DASHBOARD);
     
-    // Data master sekarang dikelola sebagai state
-    const [students, setStudents] = useState<Student[]>(INITIAL_STUDENTS);
-    const [teachers, setTeachers] = useState<(User & {role: 'teacher'})[]>(INITIAL_TEACHERS);
-    const [homeroomTeachers, setHomeroomTeachers] = useState<HomeroomTeacher[]>(INITIAL_HOMEROOM_TEACHERS);
+    // Undo/Redo history state - SINGLE SOURCE OF TRUTH for students, teachers, homeroom
+    const [historyStack, setHistoryStack] = useState<DataState[]>([{
+        students: INITIAL_STUDENTS,
+        teachers: INITIAL_TEACHERS,
+        homeroomTeachers: INITIAL_HOMEROOM_TEACHERS,
+    }]);
+    const [historyIndex, setHistoryIndex] = useState(0);
+
+    // Data master states are now derived directly from the history stack
+    const { students, teachers, homeroomTeachers } = historyStack[historyIndex];
+    
+    // Other states not part of undo/redo
     const [subjects, setSubjects] = useState<string[]>(INITIAL_SUBJECTS);
     const [grades, setGrades] = useState<Grade[]>(INITIAL_GRADES);
     const [history, setHistory] = useState<HistoryLog[]>([]);
+
+    // --- HISTORY LOGGING ---
+    const addHistoryLog = useCallback((action: string, details: string) => {
+        const logEntry: HistoryLog = {
+            timestamp: new Date(),
+            user: currentUser?.name || 'System',
+            action,
+            details
+        };
+        setHistory(prevHistory => [logEntry, ...prevHistory]);
+    }, [currentUser]);
+
+    // --- UNDO/REDO & DATA UPDATE LOGIC ---
+    const updateDataAndPushHistory = useCallback((updates: Partial<DataState>) => {
+        const currentState = historyStack[historyIndex];
+        const nextState: DataState = {
+            students: updates.students ?? currentState.students,
+            teachers: updates.teachers ?? currentState.teachers,
+            homeroomTeachers: updates.homeroomTeachers ?? currentState.homeroomTeachers,
+        };
+
+        const newHistoryStack = historyStack.slice(0, historyIndex + 1);
+        newHistoryStack.push(nextState);
+        setHistoryStack(newHistoryStack);
+        setHistoryIndex(newHistoryStack.length - 1);
+    }, [historyStack, historyIndex]);
+
+    const canUndo = historyIndex > 0;
+    const canRedo = historyIndex < historyStack.length - 1;
+
+    const handleUndo = useCallback(() => {
+        if (!canUndo) return;
+        setHistoryIndex(prevIndex => prevIndex - 1);
+        addHistoryLog('Undo', `Mengembalikan perubahan data.`);
+    }, [canUndo, addHistoryLog]);
+
+    const handleRedo = useCallback(() => {
+        if (!canRedo) return;
+        setHistoryIndex(prevIndex => prevIndex + 1);
+        addHistoryLog('Redo', `Mengulangi perubahan data.`);
+    }, [canRedo, addHistoryLog]);
+
 
     // --- COMPUTED/MEMOIZED DATA ---
     const studentsByClass = useMemo(() => {
@@ -54,17 +108,6 @@ const App: React.FC = () => {
     
     const allClasses = useMemo(() => [...new Set([...students.map(s => s.class), ...homeroomTeachers.map(h => h.class)])].sort(), [students, homeroomTeachers]);
 
-    // --- HISTORY LOGGING ---
-    const addHistoryLog = useCallback((action: string, details: string) => {
-        const logEntry: HistoryLog = {
-            timestamp: new Date(),
-            user: currentUser?.name || 'System',
-            action,
-            details
-        };
-        setHistory(prevHistory => [logEntry, ...prevHistory]);
-    }, [currentUser]);
-
     // --- CRUD & DATA HANDLERS ---
     const handleSaveGrades = useCallback((newGrades: Grade[], subject: string, studentClass: string) => {
         setGrades(prevGrades => {
@@ -86,16 +129,16 @@ const App: React.FC = () => {
     const handleStudentAction = (action: 'add' | 'update' | 'delete', data: Student | string) => {
         if (action === 'add') {
             const newStudent = { ...data as Student, id: `S${Date.now()}` };
-            setStudents(prev => [...prev, newStudent]);
+            updateDataAndPushHistory({ students: [...students, newStudent] });
             addHistoryLog('Tambah Siswa', `Menambahkan siswa baru: ${newStudent.name} (${newStudent.studentId})`);
         } else if (action === 'update') {
             const updatedStudent = data as Student;
-            setStudents(prev => prev.map(s => s.id === updatedStudent.id ? updatedStudent : s));
+            updateDataAndPushHistory({ students: students.map(s => s.id === updatedStudent.id ? updatedStudent : s) });
             addHistoryLog('Update Siswa', `Memperbarui data siswa: ${updatedStudent.name}`);
         } else if (action === 'delete') {
             const studentId = data as string;
             const studentName = students.find(s => s.id === studentId)?.name || 'N/A';
-            setStudents(prev => prev.filter(s => s.id !== studentId));
+            updateDataAndPushHistory({ students: students.filter(s => s.id !== studentId) });
             addHistoryLog('Hapus Siswa', `Menghapus siswa: ${studentName}`);
         }
     };
@@ -104,16 +147,16 @@ const App: React.FC = () => {
     const handleTeacherAction = (action: 'add' | 'update' | 'delete', data: (User & {role: 'teacher'}) | string) => {
          if (action === 'add') {
             const newTeacher = { ...data as (User & {role: 'teacher'}), id: `T${Date.now()}` };
-            setTeachers(prev => [...prev, newTeacher]);
+            updateDataAndPushHistory({ teachers: [...teachers, newTeacher] });
             addHistoryLog('Tambah Guru', `Menambahkan guru baru: ${newTeacher.name}`);
         } else if (action === 'update') {
             const updatedTeacher = data as (User & {role: 'teacher'});
-            setTeachers(prev => prev.map(t => t.id === updatedTeacher.id ? updatedTeacher : t));
+            updateDataAndPushHistory({ teachers: teachers.map(t => t.id === updatedTeacher.id ? updatedTeacher : t) });
             addHistoryLog('Update Guru', `Memperbarui data guru: ${updatedTeacher.name}`);
         } else if (action === 'delete') {
             const teacherId = data as string;
             const teacherName = teachers.find(t => t.id === teacherId)?.name || 'N/A';
-            setTeachers(prev => prev.filter(t => t.id !== teacherId));
+            updateDataAndPushHistory({ teachers: teachers.filter(t => t.id !== teacherId) });
             addHistoryLog('Hapus Guru', `Menghapus guru: ${teacherName}`);
         }
     };
@@ -122,16 +165,16 @@ const App: React.FC = () => {
     const handleHomeroomAction = (action: 'add' | 'update' | 'delete', data: HomeroomTeacher | string) => {
         if (action === 'add') {
             const newHr = { ...data as HomeroomTeacher, id: `HR${Date.now()}` };
-            setHomeroomTeachers(prev => [...prev, newHr]);
+            updateDataAndPushHistory({ homeroomTeachers: [...homeroomTeachers, newHr] });
             addHistoryLog('Tambah Wali Kelas', `Menambahkan wali kelas baru: ${newHr.name}`);
         } else if (action === 'update') {
             const updatedHr = data as HomeroomTeacher;
-            setHomeroomTeachers(prev => prev.map(h => h.id === updatedHr.id ? updatedHr : h));
+            updateDataAndPushHistory({ homeroomTeachers: homeroomTeachers.map(h => h.id === updatedHr.id ? updatedHr : h) });
             addHistoryLog('Update Wali Kelas', `Memperbarui data wali kelas: ${updatedHr.name}`);
         } else if (action === 'delete') {
             const hrId = data as string;
             const hrName = homeroomTeachers.find(h => h.id === hrId)?.name || 'N/A';
-            setHomeroomTeachers(prev => prev.filter(h => h.id !== hrId));
+            updateDataAndPushHistory({ homeroomTeachers: homeroomTeachers.filter(h => h.id !== hrId) });
             addHistoryLog('Hapus Wali Kelas', `Menghapus wali kelas: ${hrName}`);
         }
     };
@@ -152,9 +195,10 @@ const App: React.FC = () => {
                 alert(`Mata pelajaran "${newName}" sudah ada.`);
                 return;
             }
-            // Cascading update
+            // Cascading update for subjects (now undoable for teachers)
             setSubjects(prev => prev.map(s => s === oldName ? newName : s).sort());
-            setTeachers(prev => prev.map(t => ({...t, subjects: t.subjects.map(s => s === oldName ? newName : s)})));
+            const newTeachers = teachers.map(t => ({...t, subjects: t.subjects.map(s => s === oldName ? newName : s)}));
+            updateDataAndPushHistory({ teachers: newTeachers });
             setGrades(prev => prev.map(g => g.subject === oldName ? {...g, subject: newName} : g));
             addHistoryLog('Update Mapel', `Mengubah nama mapel dari "${oldName}" menjadi "${newName}"`);
 
@@ -173,6 +217,17 @@ const App: React.FC = () => {
             addHistoryLog('Hapus Mapel', `Menghapus mata pelajaran: ${subjectToDelete}`);
         }
     };
+
+     const handleBulkDataChange = useCallback((dataType: 'students' | 'teachers' | 'homeroom', data: any[]) => {
+        if (dataType === 'students') {
+            updateDataAndPushHistory({ students: data });
+        } else if (dataType === 'teachers') {
+            updateDataAndPushHistory({ teachers: data });
+        } else if (dataType === 'homeroom') {
+            updateDataAndPushHistory({ homeroomTeachers: data });
+        }
+    }, [updateDataAndPushHistory]);
+
 
     // --- AUTHENTICATION ---
     const handleLogin = (user: User) => {
@@ -253,10 +308,12 @@ const App: React.FC = () => {
                     onTeacherAction={handleTeacherAction}
                     onHomeroomAction={handleHomeroomAction}
                     onSubjectAction={handleSubjectAction}
-                    setStudents={setStudents}
-                    setTeachers={setTeachers}
-                    setHomeroomTeachers={setHomeroomTeachers}
+                    onBulkDataChange={handleBulkDataChange}
                     addHistoryLog={addHistoryLog}
+                    onUndo={handleUndo}
+                    onRedo={handleRedo}
+                    canUndo={canUndo}
+                    canRedo={canRedo}
                 />;
             case AppView.HISTORY:
                 if (currentUser.role !== 'admin') return <p>Hanya admin yang bisa mengakses halaman ini.</p>;
